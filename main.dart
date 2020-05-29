@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_database/Operasi.dart';
+import 'package:flutter_database/awal.dart';
 // change `flutter_database` to whatever your project name is
-import 'package:flutter_database/database_helper.dart';
+
 
 void main() => runApp(MyApp());
 
@@ -12,90 +14,76 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: MyHomePage(title: 'SQFlite'),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key key, this.title}) : super(key: key);
+  final String title;
 
-  // reference to our single class that manages the database
-  final dbHelper = DatabaseHelper.instance;
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
 
-  // homepage layout
+class _MyHomePageState extends State<MyHomePage> {
+
+  int _selectedIndex = 0;
+  final _layoutPage = [
+    Awal(),
+    Operasi()
+  ];
+
+  void _onTabItem(int index){
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() {
+      // This call to setState tells the Flutter framework that something has
+      // changed in this State, which causes it to rerun the build method below
+      // so that the display can reflect the updated values. If we changed
+      // _counter without calling setState(), then the build method would not be
+      // called again, and so nothing would appear to happen.
+      _counter++;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    //
+    // The Flutter framework has been optimized to make rerunning build methods
+    // fast, so that you can just rebuild anything that needs updating rather
+    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        title: Text('SQFlite'),
-        leading: new IconButton(icon: new Icon(Icons.home, color: Colors.white)),
-        //Menambahkan Beberapa Action Button
-        actions: <Widget>[
-          new IconButton(icon: new Icon(Icons.call, color: Colors.white)),
-          new IconButton(icon: new Icon(Icons.search, color: Colors.white)),
+      /*appBar: AppBar(
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text(widget.title),
+      ),*/
+      body: _layoutPage.elementAt(_selectedIndex),
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              title: Text('Awal')
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.save),
+              title: Text('Operasi')
+          ),
         ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            RaisedButton(
-              child: Text('insert', style: TextStyle(fontSize: 20),),
-              onPressed: () {_insert();},
-            ),
-            RaisedButton(
-              child: Text('query', style: TextStyle(fontSize: 20),),
-              onPressed: () {_query();},
-            ),
-            RaisedButton(
-              child: Text('update', style: TextStyle(fontSize: 20),),
-              onPressed: () {_update();},
-            ),
-            RaisedButton(
-              child: Text('delete', style: TextStyle(fontSize: 20),),
-              onPressed: () {_delete();},
-            ),
-          ],
-        ),
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _selectedIndex,
+        onTap: _onTabItem,
       ),
     );
-
-  }
-
-  // Button onPressed methods
-
-  void _insert() async {
-    // row to insert
-    Map<String, dynamic> row = {
-      DatabaseHelper.columnName : 'Bob',
-      DatabaseHelper.columnAge  : 23
-    };
-    final id = await dbHelper.insert(row);
-    print('inserted row id: $id');
-  }
-
-  void _query() async {
-    final allRows = await dbHelper.queryAllRows();
-    print('query all rows:');
-    allRows.forEach((row) => print(row));
-  }
-
-  void _update() async {
-    // row to update
-    Map<String, dynamic> row = {
-      DatabaseHelper.columnId   : 1,
-      DatabaseHelper.columnName : 'Mary',
-      DatabaseHelper.columnAge  : 32
-    };
-    final rowsAffected = await dbHelper.update(row);
-    print('updated $rowsAffected row(s)');
-  }
-
-  void _delete() async {
-    // Assuming that the number of rows is the id for the last row.
-    final id = await dbHelper.queryRowCount();
-    final rowsDeleted = await dbHelper.delete(id);
-    print('deleted $rowsDeleted row(s): row $id');
   }
 }
-
